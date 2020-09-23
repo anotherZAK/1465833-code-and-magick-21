@@ -46,6 +46,7 @@ window.renderStatistics = function (ctx, names, times) {
     ctx.fillStyle = `#000000`;
     ctx.fillText(names[i], TEXT_X + (BAR_GAP + BAR_WIDTH) * i, SHIFT_NAMES_Y);
     ctx.fillText(Math.round(times[i]), TEXT_X + (BAR_GAP + BAR_WIDTH) * i, SHIFT_TIMES_Y - currentHeight);
+
     if (names[i] === `Вы`) {
       renderResults(ctx, TEXT_X + (BAR_GAP + BAR_WIDTH) * i, SHIFT_BAR_Y, `rgba(255, 0, 0, 1)`, -currentHeight);
     } else {
