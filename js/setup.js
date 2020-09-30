@@ -36,11 +36,18 @@ const WIZARD_DATA = {
     `blue`,
     `yellow`,
     `green`
+  ],
+  FIREBALL_COLORS: [
+    `#ee4830`,
+    `#30a8ee`,
+    `#5ce6c0`,
+    `#e848d5`,
+    `#e6e848`
   ]
 };
 
 const characterSetupWindow = document.querySelector(`.setup`);
-characterSetupWindow.classList.remove(`hidden`);
+// characterSetupWindow.classList.remove(`hidden`);
 
 /**
  * выбирает случайный индекс массива
@@ -146,3 +153,99 @@ incarnateCharacters(wizards);
 
 const characterSimilarMenu = characterSetupWindow.querySelector(`.setup-similar`);
 characterSimilarMenu.classList.remove(`hidden`);
+
+const setup = document.querySelector(`.setup`);
+const setupOpen = document.querySelector(`.setup-open`);
+const setupClose = setup.querySelector(`.setup-close`);
+
+const wizardFireball = document.querySelector(`.setup-fireball-wrap`);
+const fireballInput = wizardFireball.querySelector(`input`);
+
+const wizardCoat = document.querySelector(`.wizard-coat`);
+const coatInput = document.querySelector(`input[name="coat-color"]`);
+
+const wizardEyes = document.querySelector(`.wizard-eyes`);
+const eyesInput = document.querySelector(`input[name="eyes-color"]`);
+
+/**
+ * скрывает окно настройки персонажа при нажатии клавиши Escape
+ * @param {Object} evt - объект события
+ */
+
+const onPopupEscPress = function (evt) {
+  if (evt.key === `Escape`) {
+    evt.preventDefault();
+    closePopup();
+  }
+};
+
+
+/**
+ * открывает окно настройки персонажа
+ */
+
+const openPopup = function () {
+  setup.classList.remove(`hidden`);
+
+  document.addEventListener(`keydown`, onPopupEscPress);
+};
+
+/**
+ * скрывает окно настройки персонажа
+ */
+
+const closePopup = function () {
+  setup.classList.add(`hidden`);
+
+  document.removeEventListener(`keydown`, onPopupEscPress);
+};
+
+const changeColor = function (selector) {
+  switch (selector) {
+    case wizardFireball:
+      wizardFireball.style.backgroundColor = getRandomElementFromArray(WIZARD_DATA.FIREBALL_COLORS);
+      fireballInput.value = wizardFireball.style.backgroundColor;
+      break;
+    case wizardCoat:
+      wizardCoat.style.fill = getRandomElementFromArray(WIZARD_DATA.COAT_COLORS);
+      coatInput.value = wizardCoat.style.fill;
+      break;
+    case wizardEyes:
+      wizardEyes.style.fill = getRandomElementFromArray(WIZARD_DATA.EYES_COLORS);
+      eyesInput.value = wizardEyes.style.fill;
+      break;
+  }
+};
+
+setupOpen.addEventListener(`click`, function () {
+  openPopup();
+});
+
+setupOpen.addEventListener(`keydown`, function (evt) {
+  if (evt.key === `Enter`) {
+    openPopup();
+  }
+});
+
+
+setupClose.addEventListener(`click`, function () {
+  closePopup();
+});
+
+setupClose.addEventListener(`keydown`, function (evt) {
+  if (evt.key === `Enter`) {
+    closePopup();
+  }
+});
+
+wizardFireball.addEventListener(`click`, function () {
+  changeColor(wizardFireball);
+});
+
+wizardCoat.addEventListener(`click`, function () {
+  changeColor(wizardCoat);
+});
+
+wizardEyes.addEventListener(`click`, function () {
+  changeColor(wizardEyes);
+});
