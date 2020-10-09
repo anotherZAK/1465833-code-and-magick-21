@@ -45,16 +45,16 @@
   const changeColor = function (evt) {
     switch (evt.target.classList.value) {
       case `setup-fireball`:
-        evt.target.style.backgroundColor = window.util.getRandomElementFromArray(window.util.wizardData.FIREBALL_COLORS);
-        fireballInput.value = evt.target.style.backgroundColor;
+        fireballInput.value = window.util.getRandomElementFromArray(window.util.wizardData.FIREBALL_COLORS);
+        evt.target.style.backgroundColor = fireballInput.value;
         break;
       case `wizard-coat`:
-        evt.target.style.fill = window.util.getRandomElementFromArray(window.util.wizardData.COAT_COLORS);
-        coatInput.value = evt.target.style.fill;
+        coatInput.value = window.util.getRandomElementFromArray(window.util.wizardData.COAT_COLORS);
+        evt.target.style.fill = coatInput.value;
         break;
       case `wizard-eyes`:
-        evt.target.style.fill = window.util.getRandomElementFromArray(window.util.wizardData.EYES_COLORS);
-        eyesInput.value = evt.target.style.fill;
+        eyesInput.value = window.util.getRandomElementFromArray(window.util.wizardData.EYES_COLORS);
+        evt.target.style.fill = eyesInput.value;
         break;
     }
   };
