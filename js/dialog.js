@@ -86,6 +86,5 @@
   setupClose.addEventListener(`keydown`, function (evt) {
     window.util.isEnterEvent(evt, closePopup);
   });
-
 })();
 
