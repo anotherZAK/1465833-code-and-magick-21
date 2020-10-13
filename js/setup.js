@@ -3,82 +3,91 @@
 (function () {
   const NUMBER_OF_WIZARDS = 4;
 
-  /**
-   * создаёт объект со случайно выбранными свойствами персонажа
-   * @param {Array} names - исходный массив имён
-   * @param {Array} surnames - исходный массив фамилий
-   * @param {Array} coatColors - исходный массив цветов плащей
-   * @param {Array} eyesColors - исходный массив цветов глаз
-   * @return {Object} - объект со свойствами персонажа
-   */
-
-  const generateCharacterData = function (names, surnames, coatColors, eyesColors) {
-    return {
-      name: `${window.util.getRandomElementFromArray(names)} ${window.util.getRandomElementFromArray(surnames)}`,
-      coatColor: window.util.getRandomElementFromArray(coatColors),
-      eyesColor: window.util.getRandomElementFromArray(eyesColors)
-    };
-  };
-
   const similarWizardTemplate = document.querySelector(`#similar-wizard-template`).content;
   const similarWizardItem = similarWizardTemplate.querySelector(`.setup-similar-item`);
+  const characterSetupWindow = document.querySelector(`.setup`);
 
-  /**
-   * формирует разметку со свойствами персонажа
-   * @param {Object} character - исходный объект со свойствами персонажа
-   * @return {Object} - объект html-разметки с записанными свойствами персонажа
-   */
+  const renderWizard = function (wizard) {
+    const wizardElement = similarWizardItem.cloneNode(true);
 
-  const makeHtmlCharacter = function (character) {
-    const characterElement = similarWizardItem.cloneNode(true);
-    const characterName = characterElement.querySelector(`.setup-similar-label`);
-    const characterCoat = characterElement.querySelector(`.wizard-coat`);
-    const characterEyes = characterElement.querySelector(`.wizard-eyes`);
+    wizardElement.querySelector(`.setup-similar-label`).textContent = wizard.name;
+    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.colorCoat;
 
-    characterName.textContent = character.name;
-    characterCoat.style.fill = character.coatColor;
-    characterEyes.style.fill = character.eyesColor;
-    return characterElement;
+    return wizardElement;
   };
 
   /**
-   * создаёт массив объектов с персонажами
-   * @param {number} numberOfCharacters - количество персонажей
-   * @param {Object} charectersData - данные персонажей
-   * @return {Array} - массив с объектами - персонажами
+   * настраивает стиль информационного сообщения
+   * @param {String} message - сообщение
+   * @param {String} color - цвет заливки блока сообщения
+   * @return {Object} node - блок с сообщением
    */
+  const configureMessageStyle = function (message, color) {
+    const node = document.createElement(`div`);
+    node.style = `z-index: 100; margin: 0 auto; text-align: center; background-color: ${color};`;
+    node.style.position = `fixed`;
+    node.style.left = 0;
+    node.style.right = 0;
+    node.style.fontSize = `30px`;
+    node.textContent = message;
 
-  const generateCharacters = function (numberOfCharacters, charectersData) {
-    let characters = [];
-    for (let i = 0; i < numberOfCharacters; i++) {
-      characters[i] = generateCharacterData(
-          charectersData.NAMES,
-          charectersData.SURNAMES,
-          charectersData.COAT_COLORS,
-          charectersData.EYES_COLORS);
-    }
-
-    return characters;
+    return node;
   };
 
-  const wizards = generateCharacters(NUMBER_OF_WIZARDS, window.util.wizardData);
+  /**
+   * отображает сообщение при успешной отправке данных и скрывает окно настройки персонажа
+   * @param {*} message - сообщение
+   */
+  const successHandlerSubmit = function (message) {
+    document.body.insertAdjacentElement(`afterbegin`, configureMessageStyle(message, `green`));
+    characterSetupWindow.classList.add(`hidden`);
+  };
 
   /**
-   * Добавляет песонажей в разметку документа
-   * @param {Array} characters - исходный массив с объектами - персонажами
-   * @return {Object} - объект-список с новой разметкой, содержащей разметку объектов - персонажей
+   * отображает загруженные данные (похожих персонажей)
+   * @param {Object} characters - загруженные данные
    */
-
-  const incarnateCharacters = function (characters) {
+  const successHandlerLoad = function (characters) {
+    const fragment = document.createDocumentFragment();
     const characterList = document.querySelector(`.setup-similar-list`);
-    const charactersContainer = document.createDocumentFragment();
+    const shuffleCharacters = window.util.shuffleArray(characters);
 
-    for (let i = 0; i < characters.length; i++) {
-      charactersContainer.appendChild(makeHtmlCharacter(characters[i]));
+    for (let i = 0; i < NUMBER_OF_WIZARDS; i++) {
+      fragment.appendChild(renderWizard(shuffleCharacters[i]));
     }
+    characterList.appendChild(fragment);
 
-    return characterList.appendChild(charactersContainer);
+    characterSetupWindow.querySelector(`.setup-similar`).classList.remove(`hidden`);
   };
 
-  incarnateCharacters(wizards);
+  /**
+   * отображает сообщение при неуспешной загрузке данных
+   * @param {String} errorMessage - сообщение
+   * @return {String} node - блок с сообщением
+   */
+  const errorHandlerLoad = function (errorMessage) {
+    const node = document.querySelector(`.setup-similar-list`);
+    node.style = `z-index: 100; margin: 0 auto; justify-content: center; background-color: tomato; border-width: 3px; border-style: solid; border-color: red;`;
+    node.style.fontSize = `22px`;
+    node.style.fontWeight = `bold`;
+    node.textContent = errorMessage;
+
+    return node;
+  };
+
+  /**
+   * отображает сообщение при неуспешной отправке данных
+   * @param {*} errorMessage - сообщение
+   */
+  const errorHandlerSubmit = function (errorMessage) {
+    document.body.insertAdjacentElement(`afterbegin`, configureMessageStyle(errorMessage, `red`));
+  };
+
+  window.backend.load(successHandlerLoad, errorHandlerLoad);
+
+  const wizardForm = characterSetupWindow.querySelector(`.setup-wizard-form`);
+  wizardForm.addEventListener(`submit`, function (evt) {
+    window.backend.save(new FormData(wizardForm), successHandlerSubmit, errorHandlerSubmit);
+    evt.preventDefault();
+  });
 })();

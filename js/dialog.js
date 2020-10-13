@@ -9,14 +9,10 @@
   const setupUserName = characterSetupWindow.querySelector(`.setup-user-name`);
   const setupClose = characterSetupWindow.querySelector(`.setup-close`);
 
-  const wizardFireball = document.querySelector(`.setup-fireball-wrap`);
-  const fireballInput = wizardFireball.querySelector(`input`);
-
-  const wizardCoat = document.querySelector(`.wizard-coat`);
-  const coatInput = document.querySelector(`input[name="coat-color"]`);
-
-  const wizardEyes = document.querySelector(`.wizard-eyes`);
-  const eyesInput = document.querySelector(`input[name="eyes-color"]`);
+  const setupPlayer = characterSetupWindow.querySelector(`.setup-player`);
+  const fireballInput = characterSetupWindow.querySelector(`input[name="fireball-color"]`);
+  const coatInput = characterSetupWindow.querySelector(`input[name="coat-color"]`);
+  const eyesInput = characterSetupWindow.querySelector(`input[name="eyes-color"]`);
 
   /**
    * скрывает окно настройки персонажа при нажатии клавиши Escape
@@ -44,21 +40,21 @@
 
   /**
    * перезаписывает свойства переданного объекта
-   * @param {Objest} selector - исходный объект
+   * @param {Objest} evt - объект-событие
    */
-  const changeColor = function (selector) {
-    switch (selector) {
-      case wizardFireball:
-        wizardFireball.style.backgroundColor = window.util.getRandomElementFromArray(window.util.wizardData.FIREBALL_COLORS);
-        fireballInput.value = wizardFireball.style.backgroundColor;
+  const changeColor = function (evt) {
+    switch (evt.target.classList.value) {
+      case `setup-fireball`:
+        fireballInput.value = window.util.getRandomElementFromArray(window.util.wizardData.FIREBALL_COLORS);
+        evt.target.style.backgroundColor = fireballInput.value;
         break;
-      case wizardCoat:
-        wizardCoat.style.fill = window.util.getRandomElementFromArray(window.util.wizardData.COAT_COLORS);
-        coatInput.value = wizardCoat.style.fill;
+      case `wizard-coat`:
+        coatInput.value = window.util.getRandomElementFromArray(window.util.wizardData.COAT_COLORS);
+        evt.target.style.fill = coatInput.value;
         break;
-      case wizardEyes:
-        wizardEyes.style.fill = window.util.getRandomElementFromArray(window.util.wizardData.EYES_COLORS);
-        eyesInput.value = wizardEyes.style.fill;
+      case `wizard-eyes`:
+        eyesInput.value = window.util.getRandomElementFromArray(window.util.wizardData.EYES_COLORS);
+        evt.target.style.fill = eyesInput.value;
         break;
     }
   };
@@ -69,6 +65,10 @@
 
   setupOpen.addEventListener(`keydown`, function (evt) {
     window.util.isEnterEvent(evt, openPopup);
+  });
+
+  setupPlayer.addEventListener(`click`, function (evt) {
+    changeColor(evt);
   });
 
   setupUserName.addEventListener(`focus`, function () {
@@ -85,18 +85,6 @@
 
   setupClose.addEventListener(`keydown`, function (evt) {
     window.util.isEnterEvent(evt, closePopup);
-  });
-
-  wizardFireball.addEventListener(`click`, function () {
-    changeColor(wizardFireball);
-  });
-
-  wizardCoat.addEventListener(`click`, function () {
-    changeColor(wizardCoat);
-  });
-
-  wizardEyes.addEventListener(`click`, function () {
-    changeColor(wizardEyes);
   });
 })();
 
