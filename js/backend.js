@@ -29,7 +29,7 @@
       onError(`Данные не отправлены. Запрос не выполнился за ${xhr.timeout} мс.`);
     });
 
-    let URL = `https://21.javascript.pages.academy/code-and-magick`;
+    const URL = `https://21.javascript.pages.academy/code-and-magick`;
     xhr.open(`POST`, URL);
     xhr.send(data);
   };
@@ -44,7 +44,7 @@
     xhr.responseType = `json`;
     xhr.timeout = TIMEOUT_MS;
 
-    let URL = `https://21.javascript.pages.academy/code-and-magick/data`;
+    const URL = `https://21.javascript.pages.academy/code-and-magick/data`;
     xhr.open(`GET`, URL);
 
     xhr.addEventListener(`load`, function () {
@@ -54,11 +54,11 @@
         onError(`Данные не загружены. Статус ответа: ${xhr.status} ${xhr.statusText}.`);
       }
     });
-    xhr.addEventListener(`error`, function () {
-      onError(`Данные не загружены. Произошла ошибка соединения.`);
-    });
     xhr.addEventListener(`timeout`, function () {
       onError(`Данные не загружены. Запрос не выполнился за ${xhr.timeout} мс.`);
+    });
+    xhr.addEventListener(`error`, function () {
+      onError(`Данные не загружены. Произошла ошибка соединения.`);
     });
 
     xhr.send();

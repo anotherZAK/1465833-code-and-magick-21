@@ -1,20 +1,7 @@
 'use strict';
 
 (function () {
-  const NUMBER_OF_WIZARDS = 4;
-
-  const similarWizardTemplate = document.querySelector(`#similar-wizard-template`).content;
-  const similarWizardItem = similarWizardTemplate.querySelector(`.setup-similar-item`);
   const characterSetupWindow = document.querySelector(`.setup`);
-
-  const renderWizard = function (wizard) {
-    const wizardElement = similarWizardItem.cloneNode(true);
-
-    wizardElement.querySelector(`.setup-similar-label`).textContent = wizard.name;
-    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.colorCoat;
-
-    return wizardElement;
-  };
 
   /**
    * настраивает стиль информационного сообщения
@@ -36,11 +23,91 @@
 
   /**
    * отображает сообщение при успешной отправке данных и скрывает окно настройки персонажа
-   * @param {*} message - сообщение
+   * @param {String} message - сообщение
    */
   const successHandlerSubmit = function (message) {
     document.body.insertAdjacentElement(`afterbegin`, configureMessageStyle(message, `green`));
     characterSetupWindow.classList.add(`hidden`);
+  };
+
+  let coatColor = window.util.wizardData.COAT_COLORS[1];
+  let eyesColor = window.util.wizardData.EYES_COLORS[1];
+  let wizards = [];
+
+  /**
+   * ранжирует похожих волшебников по совпадению цветов плаща и глаз
+   * @param {Object} wizard - объект с данными волшебника
+   * @return {Number} - весовой коэффициент
+   */
+  const getRank = function (wizard) {
+    let rank = 0;
+
+    if (wizard.colorCoat === coatColor) {
+      rank += 2;
+    }
+    if (wizard.colorEyes === eyesColor) {
+      rank += 1;
+    }
+
+    return rank;
+  };
+
+  /**
+   * сортирует данные в алфавитном порядке по возрастанию
+   * @param {*} left - очередной элемент массива данных
+   * @param {*} right - следующий элемент массива данных
+   * @return {Number} - номер, определяющий направление сортировки
+   */
+  const namesComparator = function (left, right) {
+    if (left > right) {
+      return 1;
+    } else if (left < right) {
+      return -1;
+    } else {
+      return 0;
+    }
+  };
+
+  /**
+   * фильтрует массив похожих волшебников
+   */
+  const updateWizards = function () {
+    window.render.renderWizard(wizards.sort(function (left, right) {
+      let rankDiff = getRank(right) - getRank(left);
+      if (rankDiff === 0) {
+        rankDiff = namesComparator(left.name, right.name);
+      }
+      return rankDiff;
+    }));
+  };
+
+  const fireballInput = characterSetupWindow.querySelector(`input[name="fireball-color"]`);
+  const coatInput = characterSetupWindow.querySelector(`input[name="coat-color"]`);
+  const eyesInput = characterSetupWindow.querySelector(`input[name="eyes-color"]`);
+
+  /**
+   * перезаписывает свойства переданного объекта
+   * @param {Objest} evt - объект-событие
+   */
+  const changeColor = function (evt) {
+    switch (evt.target.classList.value) {
+      case `setup-fireball`:
+        fireballInput.value = window.util.getRandomElementFromArray(window.util.wizardData.FIREBALL_COLORS);
+        evt.target.style.backgroundColor = fireballInput.value;
+        break;
+      case `wizard-coat`:
+        coatInput.value = window.util.getRandomElementFromArray(window.util.wizardData.COAT_COLORS);
+        evt.target.style.fill = coatInput.value;
+        coatColor = coatInput.value;
+        window.debounce.debounce(updateWizards);
+        break;
+      case `wizard-eyes`:
+        eyesInput.value = window.util.getRandomElementFromArray(window.util.wizardData.EYES_COLORS);
+        evt.target.style.fill = eyesInput.value;
+        eyesColor = eyesInput.value;
+        window.debounce.debounce(updateWizards);
+        break;
+    }
   };
 
   /**
@@ -48,22 +115,14 @@
    * @param {Object} characters - загруженные данные
    */
   const successHandlerLoad = function (characters) {
-    const fragment = document.createDocumentFragment();
-    const characterList = document.querySelector(`.setup-similar-list`);
-    const shuffleCharacters = window.util.shuffleArray(characters);
-
-    for (let i = 0; i < NUMBER_OF_WIZARDS; i++) {
-      fragment.appendChild(renderWizard(shuffleCharacters[i]));
-    }
-    characterList.appendChild(fragment);
-
-    characterSetupWindow.querySelector(`.setup-similar`).classList.remove(`hidden`);
+    wizards = characters;
+    window.render.renderWizard(characters);
   };
 
   /**
    * отображает сообщение при неуспешной загрузке данных
    * @param {String} errorMessage - сообщение
-   * @return {String} node - блок с сообщением
+   * @return {String} - блок с сообщением
    */
   const errorHandlerLoad = function (errorMessage) {
     const node = document.querySelector(`.setup-similar-list`);
@@ -77,7 +136,7 @@
 
   /**
    * отображает сообщение при неуспешной отправке данных
-   * @param {*} errorMessage - сообщение
+   * @param {String} errorMessage - сообщение
    */
   const errorHandlerSubmit = function (errorMessage) {
     document.body.insertAdjacentElement(`afterbegin`, configureMessageStyle(errorMessage, `red`));
@@ -90,4 +149,8 @@
     window.backend.save(new FormData(wizardForm), successHandlerSubmit, errorHandlerSubmit);
     evt.preventDefault();
   });
+
+  window.setup = {
+    changeColor: changeColor
+  };
 })();
